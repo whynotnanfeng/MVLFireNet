@@ -247,6 +247,7 @@ zero inference overhead of the branch.
 
 ```
 MVLFireNet/
+|-- CITATION.cff           # Citation File Format (GitHub "Cite" button)
 |-- CITATION.bib           # BibTeX entry for the paper
 |-- config.py              # paths, data, hardware, architecture, loss, optimisation
 |-- train.py               # training entry: EMA, Mosaic schedule, grad accumulation
@@ -272,7 +273,21 @@ MVLFireNet/
 
 ## Citation
 
-If you use this model in your work, please cite the paper:
+Cite the paper as MDPI formats it (the same string the journal page shows):
+
+```
+Ma, Y.; Shan, W.; Sui, Y.; Wang, M. A Lightweight Forest Fire Detection Model with Multi-Granularity Vision-Language Enhancement. Fire 2026, 9, 409. https://doi.org/10.3390/fire9090409
+```
+
+Citation-manager formats are provided as well, so you can import the entry
+directly instead of typing it:
+
+* [`CITATION.cff`](CITATION.cff) -- Citation File Format 1.2.0. GitHub reads
+  this and renders a "Cite" button on the repository.
+* [`CITATION.bib`](CITATION.bib) -- BibTeX, for Zotero, JabRef and BibDesk.
+
+If you would rather take the citation straight from the publisher, the
+journal page is <https://www.mdpi.com/2571-6255/9/9/409>.
 
 ```bibtex
 @article{ma2026mvlfirenet,
@@ -288,9 +303,6 @@ If you use this model in your work, please cite the paper:
   publisher = {MDPI AG},
 }
 ```
-
-The same entry is available as [`CITATION.bib`](CITATION.bib) for citation
-managers such as Zotero, JabRef and BibDesk.
 
 ## License
 

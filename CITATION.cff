@@ -1,0 +1,47 @@
+cff-version: 1.2.0
+message: "If you use this model in your work, please cite the paper below."
+title: "MVLFireNet"
+abstract: "A lightweight forest fire and smoke detector with a multi-granularity
+  vision-language enhancement branch. The branch is used during training only and
+  is discarded at inference, so the deployed model runs at 2.41 M parameters and
+  6.8 GFLOPs while reaching 86.3% mAP@0.5 and 54.8% mAP@0.5:0.95 on FSDataset-VL."
+type: software
+authors:
+  - family-names: Ma
+    given-names: Yifan
+  - family-names: Shan
+    given-names: Weifeng
+  - family-names: Sui
+    given-names: Yanwei
+  - family-names: Wang
+    given-names: Mengyu
+license: MIT
+repository-code: "https://github.com/whynotnanfeng/MVLFireNet"
+keywords:
+  - object detection
+  - forest fire
+  - UAV monitoring
+  - vision-language alignment
+  - lightweight detector
+preferred-citation:
+  type: article
+  title: "A Lightweight Forest Fire Detection Model with Multi-Granularity Vision-Language Enhancement"
+  authors:
+    - family-names: Ma
+      given-names: Yifan
+    - family-names: Shan
+      given-names: Weifeng
+    - family-names: Sui
+      given-names: Yanwei
+    - family-names: Wang
+      given-names: Mengyu
+  journal: Fire
+  volume: 9
+  issue: 9
+  start: 409
+  year: 2026
+  month: 9
+  doi: 10.3390/fire9090409
+  issn: 2571-6255
+  publisher:
+    name: MDPI AG

@@ -247,6 +247,7 @@ zero inference overhead of the branch.
 
 ```
 MVLFireNet/
+|-- CITATION.bib           # BibTeX entry for the paper
 |-- config.py              # paths, data, hardware, architecture, loss, optimisation
 |-- train.py               # training entry: EMA, Mosaic schedule, grad accumulation
 |-- loss.py                # MAL + Hungarian / union matching + L1 + GIoU + NWD
@@ -271,21 +272,25 @@ MVLFireNet/
 
 ## Citation
 
+If you use this model in your work, please cite the paper:
+
 ```bibtex
 @article{ma2026mvlfirenet,
-  title   = {A Lightweight Forest Fire Detection Model with
-             Multi-Granularity Vision-Language Enhancement},
   author  = {Ma, Yifan and Shan, Weifeng and Sui, Yanwei and Wang, Mengyu},
+  title   = {A Lightweight Forest Fire Detection Model with Multi-Granularity Vision-Language Enhancement},
   journal = {Fire},
+  year    = {2026},
   volume  = {9},
   number  = {9},
   pages   = {409},
-  year    = {2026},
-  doi     = {10.3390/fire9090409}
+  doi     = {10.3390/fire9090409},
+  issn    = {2571-6255},
+  publisher = {MDPI AG},
 }
 ```
 
----
+The same entry is available as [`CITATION.bib`](CITATION.bib) for citation
+managers such as Zotero, JabRef and BibDesk.
 
 ## License
 

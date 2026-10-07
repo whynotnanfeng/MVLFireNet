@@ -1,9 +1,9 @@
 from models.modules import (
     CMF,
     Conv,
-    MMBasic,
-    MMBlock,
-    MMEnhance,
+    ELANBasic,
+    ELANBlock,
+    ELANEnhance,
     MGFFN,
     MSAAttention,
     MSABlock,
@@ -29,9 +29,9 @@ __all__ = [
     'MLP',
     # Building blocks
     'Conv',
-    'MMBasic',
-    'MMBlock',
-    'MMEnhance',
+    'ELANBasic',
+    'ELANBlock',
+    'ELANEnhance',
     'SPPF',
     'MGFFN',
 ]

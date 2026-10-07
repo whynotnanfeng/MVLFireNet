@@ -19,7 +19,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 from models import RTDETRDecoder
-from models.modules import Conv, MMBlock, SPPF
+from models.modules import Conv, ELANBlock, SPPF
 from models.neck import FPNNeck
 
 import config
@@ -40,16 +40,16 @@ class Backbone(nn.Module):
         c3, c4, c5 = out_channels
         self.stem = Conv(3, 16, k=3, s=2)
         self.layer2 = Conv(16, 32, k=3, s=2)
-        self.layer2_block = MMBlock(32, 64, e=0.5)
+        self.layer2_block = ELANBlock(32, 64, e=0.5)
 
         self.layer3_conv = Conv(64, 64, k=3, s=2)
-        self.layer3_block = MMBlock(64, c3, e=0.5)
+        self.layer3_block = ELANBlock(64, c3, e=0.5)
 
         self.layer4_conv = Conv(c3, c4, k=3, s=2)
-        self.layer4_block = MMBlock(c4, c4, enhance=True)
+        self.layer4_block = ELANBlock(c4, c4, enhance=True)
 
         self.layer5_conv = Conv(c4, c5, k=3, s=2)
-        self.layer5_block = MMBlock(c5, c5, enhance=True)
+        self.layer5_block = ELANBlock(c5, c5, enhance=True)
 
         self.sppf = SPPF(c5, c5, k=5, shortcut=True)
 

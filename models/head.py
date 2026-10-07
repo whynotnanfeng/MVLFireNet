@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import math
-from .modules import Conv, MMBlock, MGFFN
+from .modules import Conv, ELANBlock, MGFFN
 from utils import box_cxcywh_to_xyxy, box_xyxy_to_cxcywh
 
 

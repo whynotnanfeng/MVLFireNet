@@ -7,8 +7,8 @@ leaves, sunset glow, morning fog, dust. A detector trained on pixels alone has
 no way to tell these apart from flame and smoke, and fires false positives on
 them. MVLE injects a semantic prior from text to fix that.
 
-Two pathways align visual features with textual descriptions at different
-granularities:
+This is Section 2.2.4 of the paper. Two pathways align visual features with
+textual descriptions at different granularities:
 
 * **global** -- one embedding per image, aligned with the scene-level caption
   (weather, terrain, illumination, vegetation, fire development stage);
@@ -123,7 +123,8 @@ class MVLEBranch(nn.Module):
         self.max_tokens = max_tokens
         nhead = 4
 
-        # ── text projection: shared trunk + local head ──
+        # Text projection, Eqs. (14) and (15): a shared trunk reduces the
+        # 768-d embedding, and the local head reuses that trunk output.
         self.text_trunk = nn.Linear(text_dim, sa_dim_global)
         self.text_local_head = nn.Linear(sa_dim_global, sa_dim_local)
         nn.init.xavier_uniform_(self.text_trunk.weight)
@@ -168,7 +169,10 @@ class MVLEBranch(nn.Module):
         return self.text_trunk.in_features
 
     def _info_nce(self, visual_embed, text_embed, temperature):
-        """Symmetric InfoNCE over the batch (in-batch negatives only)."""
+        """Symmetric InfoNCE over the batch (in-batch negatives only).
+
+        The semantic alignment objective, Eqs. (19) to (20) of the paper.
+        """
         visual_embed = F.normalize(visual_embed.float(), dim=-1)
         text_embed = F.normalize(text_embed.float(), dim=-1)
         logits = visual_embed @ text_embed.T / temperature
@@ -178,6 +182,10 @@ class MVLEBranch(nn.Module):
 
     def global_loss(self, c5, global_captions):
         """Semantic alignment loss for the global pathway.
+
+        Follows Eqs. (7), (8) and (10): project to the global space with a 1x1
+        convolution, pool with attention, then refine with a SwiGLU feed-forward
+        network.
 
         Args:
             c5: deepest backbone feature map, ``[B, 256, H, W]``.
@@ -193,6 +201,10 @@ class MVLEBranch(nn.Module):
 
     def local_loss(self, c5, local_captions):
         """Semantic alignment loss for the local pathway.
+
+        The counterpart of :meth:`global_loss` for the local granularity, Eqs.
+        (11) to (13). It projects into a narrower space so the pooling focuses
+        on discriminative texture rather than broad context.
 
         The image-level embedding is contrasted against every box caption in the
         batch, so each caption supplies one positive pair.

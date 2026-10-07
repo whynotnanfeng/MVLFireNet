@@ -2,18 +2,19 @@
 """
 Building blocks for MVLFireNet.
 
-Three modules correspond directly to the contributions of the paper:
+The three contributions of the paper map onto the code as follows:
 
-* :class:`MSAAttention` -- Multi-Scale Spatial-Aware attention (MSA)
-* :class:`CMF`          -- Cross-Modulation Fusion (CMF)
-* :class:`MVLEBranch`   -- Multi-Granularity Vision-Language Enhancement (MVLE),
-                           implemented in :mod:`models.mvle`
+* **MSA** -- Multi-Scale Spatial-Aware attention, Section 2.2.2
+  -> :class:`MSAAttention`, wrapped by :class:`MSABlock` at neck level
+* **CMF** -- Cross-Modulation Fusion, Section 2.2.3
+  -> :class:`CMF`
+* **MVLE** -- Multi-Granularity Vision-Language Enhancement, Section 2.2.4
+  -> :class:`models.mvle.MVLEBranch`
 
-The remaining blocks (ELAN-style ``MMBlock``, ``SPPF``, ``MGFFN``) are standard
-detector components used by the backbone and the RT-DETR decoder head.
+The remaining blocks follow the architecture given in Section 2.2.1:
+:class:`ELANBlock` and :class:`SPPF` for the backbone, :class:`MGFFN` inside the
+RT-DETR decoder.
 """
-import math
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -46,7 +47,7 @@ class Conv(nn.Module):
 # ELAN-style backbone blocks
 # ---------------------------------------------------------------------------
 
-class MMBasic(nn.Module):
+class ELANBasic(nn.Module):
     """Residual pair of 3x3 convolutions."""
 
     def __init__(self, ch_in, ch_out, e=0.5, k=3):
@@ -59,8 +60,8 @@ class MMBasic(nn.Module):
         return x + self.cv2(self.cv1(x))
 
 
-class MMEnhance(nn.Module):
-    """Gated variant of :class:`MMBasic` with a two-layer inner block."""
+class ELANEnhance(nn.Module):
+    """Gated variant of :class:`ELANBasic` with a two-layer inner block."""
 
     def __init__(self, ch_in, ch_out, e=0.5, k=3):
         super().__init__()
@@ -68,8 +69,8 @@ class MMEnhance(nn.Module):
         self.conv1 = Conv(ch_in, self.c, k=1)
         self.conv2 = Conv(ch_in, self.c, k=1)
         self.conv3 = Conv(self.c * 2, ch_out, k=1)
-        self.b1 = MMBasic(self.c, self.c, k=k)
-        self.b2 = MMBasic(self.c, self.c, k=k)
+        self.b1 = ELANBasic(self.c, self.c, k=k)
+        self.b2 = ELANBasic(self.c, self.c, k=k)
 
     def forward(self, x):
         x1 = self.conv1(x)
@@ -77,8 +78,11 @@ class MMEnhance(nn.Module):
         return self.conv3(torch.cat((x1, x2), dim=1))
 
 
-class MMBlock(nn.Module):
-    """ELAN aggregation block: split, transform one branch, concatenate."""
+class ELANBlock(nn.Module):
+    """ELAN aggregation block: split, transform one branch, concatenate.
+
+    This is the aggregation unit of the backbone described in Section 2.2.1.
+    """
 
     def __init__(self, ch_in, ch_out, e=0.5, k=3, enhance=False):
         super().__init__()
@@ -90,9 +94,9 @@ class MMBlock(nn.Module):
         self.conv2 = Conv(self.c * 3, ch_out, k=1)
 
         if self.enhance:
-            self.en1 = MMEnhance(self.c, self.c, k=k, e=1)
+            self.en1 = ELANEnhance(self.c, self.c, k=k, e=1)
         else:
-            self.en1 = MMBasic(self.c, self.c, k=k)
+            self.en1 = ELANBasic(self.c, self.c, k=k)
 
     def forward(self, x):
         x = self.conv1(x)
@@ -102,7 +106,7 @@ class MMBlock(nn.Module):
 
 
 class SPPF(nn.Module):
-    """Spatial Pyramid Pooling - Fast."""
+    """Spatial Pyramid Pooling - Fast, placed at the end of the backbone (Section 2.2.1)."""
 
     def __init__(self, c1, c2, k=5, n=3, shortcut=False):
         super().__init__()
@@ -184,6 +188,9 @@ class MSAAttention(nn.Module):
     three parallel dilated depthwise convolutions (dilation 1, 3, 5 -> receptive
     fields 3x3, 7x7, 11x11), each scaled by an independent learnable weight.
 
+    The three branches correspond to the alpha_1, alpha_2 and alpha_3 terms of
+    Eq. (3) in the paper.
+
     The depthwise branch carries no activation: it stays linear so the learned
     weights alone control how much each scale contributes.
     """
@@ -248,6 +255,10 @@ class CMF(nn.Module):
     background in the shallow map while shallow detail restores positional
     accuracy in the deep map. The two modulated maps are concatenated for the
     next stage.
+
+    This implements Eqs. (4) to (6): the modulation factors follow Eq. (4), each
+    branch is modulated following Eq. (5), and the two are concatenated per
+    Eq. (6).
 
     Scale and bias factors are shared across groups of channels, which cuts the
     parameter cost of the fusion and regularizes it. Gamma is initialized to 1

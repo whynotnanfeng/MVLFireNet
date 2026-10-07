@@ -21,11 +21,16 @@ Forest fire targets are small and highly variable in scale, sit in cluttered
 backgrounds, and must run on power-limited UAV hardware. Three problems get in the
 way, and each module below addresses one:
 
-| Module | Problem it solves | Code |
-|--------|-------------------|------|
-| **MSA** — Multi-Scale Spatial-Aware attention | Self-attention flattens 2D feature maps into 1D sequences, destroying the high-frequency spatial detail that weak fire spots and smoke edges depend on. | [`models/modules.py`](models/modules.py) → `MSAAttention` |
-| **CMF** — Cross-Modulation Fusion | Plain concatenation at pyramid nodes treats shallow and deep features as interchangeable, although they live in different representation spaces. | [`models/modules.py`](models/modules.py) → `CMF` |
-| **MVLE** — Multi-Granularity Vision-Language Enhancement | Pixel-only detectors confuse fire with reddish leaves, sunset glow, morning fog and dust. | [`models/mvle.py`](models/mvle.py) → `MVLEBranch` |
+| Module | Paper | Problem it solves | Code |
+|--------|-------|-------------------|------|
+| **MSA** | §2.2.2 | Self-attention flattens 2D feature maps into 1D sequences, destroying the high-frequency spatial detail that weak fire spots and smoke edges depend on. | [`models/modules.py`](models/modules.py) → `MSAAttention` |
+| **CMF** | §2.2.3 | Plain concatenation at pyramid nodes treats shallow and deep features as interchangeable, although they live in different representation spaces. | [`models/modules.py`](models/modules.py) → `CMF` |
+| **MVLE** | §2.2.4 | Pixel-only detectors confuse fire with reddish leaves, sunset glow, morning fog and dust. | [`models/mvle.py`](models/mvle.py) → `MVLEBranch` |
+
+The backbone, neck and head follow §2.2.1: an ELAN backbone with SPPF
+(`Backbone`, `SPPF`), an FPN neck (`FPNNeck`), and an RT-DETR decoder
+(`RTDETRDecoder`). Each class docstring cites the section and equations it
+implements.
 
 **MVLE is discarded at inference.** It contributes gradients during training and
 nothing to the deployed model, so the reported 2.41 M / 6.8 G figures cover the
@@ -38,12 +43,12 @@ whole detector.
 ```
 Input 640x640
   |
-  +-- Backbone    ELAN-style CNN + SPPF                 -> C3, C4, C5   (1.40 M)
+  +-- Backbone    ELAN + SPPF                           -> C3, C4, C5   (1.40 M)
   |
   +-- Neck        FPN
   |     P5: C5 -> MSABlock (MSA)                        -> P5
-  |     P4: CMF(C4, P5 up) -> MMBlock                    -> P4         (0.43 M total)
-  |     P3: CMF(C3, P4 up) -> MMBlock                    -> P3
+  |     P4: CMF(C4, P5 up) -> ELANBlock                   -> P4         (0.43 M total)
+  |     P3: CMF(C3, P4 up) -> ELANBlock                   -> P3
   |
   +-- Head        RT-DETR decoder, 300 object queries    (0.58 M)
   |               MAL classification + L1 + GIoU + denoising training
@@ -249,7 +254,7 @@ MVLFireNet/
 ├── utils.py               # box coordinate helpers
 ├── models/
 │   ├── mvlfirenet.py      # MVLFireNet: backbone, wiring, LightningModule, optimiser
-│   ├── modules.py         # MSAAttention, MSABlock, CMF, ELAN blocks, SPPF, MGFFN
+│   ├── modules.py         # MSAAttention, MSABlock, CMF, ELANBlock, SPPF, MGFFN
 │   ├── neck.py            # FPN neck with MSA at P5 and CMF at the fusion nodes
 │   ├── head.py            # RT-DETR decoder: 300 queries, deformable attention, denoising
 │   └── mvle.py            # MVLE: dual-pathway alignment, frozen Long-CLIP text encoder

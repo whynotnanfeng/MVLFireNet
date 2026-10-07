@@ -11,7 +11,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from models.modules import MMBlock, CMF, MSABlock
+from models.modules import ELANBlock, CMF, MSABlock
 
 
 class FPNNeck(nn.Module):
@@ -23,8 +23,8 @@ class FPNNeck(nn.Module):
     Level   Operation                          Output
     ======  ==================================  ==============================
     P5      ``MSABlock(C5)``                   ``[256, 20, 20]``
-    P4      ``CMF(C4, P5 up) -> MMBlock``      ``[128, 40, 40]``
-    P3      ``CMF(C3, P4 up) -> MMBlock``      ``[64,  80, 80]``
+    P4      ``CMF(C4, P5 up) -> ELANBlock``      ``[128, 40, 40]``
+    P3      ``CMF(C3, P4 up) -> ELANBlock``      ``[64,  80, 80]``
     ======  ==================================  ==============================
 
     Args:
@@ -52,9 +52,9 @@ class FPNNeck(nn.Module):
             fuse_p4_ch, fuse_p3_ch = c4i + c5o, c3i + c4o
 
         # ── processing blocks ──
-        self.p5_block = MSABlock(c5i, c5o) if use_msa else MMBlock(c5i, c5o)
-        self.p4_block = MMBlock(fuse_p4_ch, c4o)
-        self.p3_block = MMBlock(fuse_p3_ch, c3o)
+        self.p5_block = MSABlock(c5i, c5o) if use_msa else ELANBlock(c5i, c5o)
+        self.p4_block = ELANBlock(fuse_p4_ch, c4o)
+        self.p3_block = ELANBlock(fuse_p3_ch, c3o)
 
     @staticmethod
     def _fuse(fusion, x, y):

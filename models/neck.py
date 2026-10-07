@@ -42,7 +42,7 @@ class FPNNeck(nn.Module):
         c3i, c4i, c5i = in_channels
         c3o, c4o, c5o = out_channels
 
-        # ── fusion nodes ──
+        # -- fusion nodes --
         if use_cmf:
             self.fuse_p4 = CMF(c4i, c5o)
             self.fuse_p3 = CMF(c3i, c4o)
@@ -51,7 +51,7 @@ class FPNNeck(nn.Module):
             self.fuse_p4 = self.fuse_p3 = None
             fuse_p4_ch, fuse_p3_ch = c4i + c5o, c3i + c4o
 
-        # ── processing blocks ──
+        # -- processing blocks --
         self.p5_block = MSABlock(c5i, c5o) if use_msa else ELANBlock(c5i, c5o)
         self.p4_block = ELANBlock(fuse_p4_ch, c4o)
         self.p3_block = ELANBlock(fuse_p3_ch, c3o)

@@ -20,11 +20,11 @@ import torch
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 
-# ── Paper reference values (Fire 2026, 9, 409, Table 6/7) ──
+# -- Paper reference values (Fire 2026, 9, 409, Table 6/7) --
 PAPER_PARAMS = 2.41e6
 PAPER_GFLOPS = 6.8
-PARAM_TOLERANCE = 0.02e6      # ±0.02 M
-GFLOPS_TOLERANCE = 0.15       # ±0.15 G
+PARAM_TOLERANCE = 0.02e6      # +/-0.02 M
+GFLOPS_TOLERANCE = 0.15       # +/-0.15 G
 
 
 def check_complexity(model, img_size):
@@ -37,7 +37,7 @@ def check_complexity(model, img_size):
         from thop import profile
         dummy = torch.randn(1, 3, img_size, img_size)
         macs, _ = profile(model, inputs=(dummy,), verbose=False)
-        gflops = macs * 2 / 1e9          # paper counts FLOPs as MACs × 2
+        gflops = macs * 2 / 1e9          # paper counts FLOPs as MACs x 2
         print(f"  GFLOPs     : {gflops:.2f} G   (MACs = {macs / 1e9:.2f} G)   paper: {PAPER_GFLOPS} G")
         ok &= abs(gflops - PAPER_GFLOPS) <= GFLOPS_TOLERANCE
     except ImportError:

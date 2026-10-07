@@ -28,7 +28,7 @@ CHECKPOINT_DIR = os.environ.get("MVLF_CHECKPOINT_DIR", str(PROJECT_DIR / "runs")
 # Reduce batch size and feature widths for debugging on a small GPU.
 DEBUG = False
 
-# ── Dataset ───────────────────────────────────────────────────────────
+# -- Dataset -----------------------------------------------------------
 NUM_CLASSES = 2                    # 0 = fire, 1 = smoke
 CLASS_NAMES = ["fire", "smoke"]
 INPUT_SIZE = 640
@@ -42,18 +42,18 @@ HYP = {
     'flip_p': 0.5, 'mosaic': 0.35, 'mixup': 0.0,
 }
 
-# ── Hardware ──────────────────────────────────────────────────────────
+# -- Hardware ----------------------------------------------------------
 DEVICES = [0]                      # e.g. [0, 1] for two GPUs
 STRATEGY = "auto"                  # "ddp" when using multiple GPUs
 PRECISION = "16-mixed"
 SEED = 42
 DETERMINISTIC = True
 
-# ── Backbone ──────────────────────────────────────────────────────────
+# -- Backbone ----------------------------------------------------------
 # Channels of the C3, C4 and C5 outputs (strides 8, 16 and 32).
 BACKBONE_OUT_CHANNELS = [128, 128, 256]
 
-# ── Neck ──────────────────────────────────────────────────────────────
+# -- Neck --------------------------------------------------------------
 NECK_OUT_CHANNELS = [64, 128, 256]     # P3, P4, P5
 
 # Paper contributions. Both flags exist so the baseline configuration of the
@@ -62,7 +62,7 @@ NECK_OUT_CHANNELS = [64, 128, 256]     # P3, P4, P5
 USE_MSA = True      # Multi-Scale Spatial-Aware attention at P5
 USE_CMF = True      # Cross-Modulation Fusion at the P4 and P3 nodes
 
-# ── Head ──────────────────────────────────────────────────────────────
+# -- Head --------------------------------------------------------------
 DECODER_HIDDEN_DIM = 128
 DECODER_NHEAD = 4
 DECODER_NUM_QUERIES = 300
@@ -74,7 +74,7 @@ NUM_DENOISING = 100
 CLS_NOISE_RATIO = 0.5
 BOX_NOISE_SCALE = 1.0
 
-# ── MVLE branch (training only) ────────────────────────────────────────
+# -- MVLE branch (training only) ----------------------------------------
 MVLE_DIM_GLOBAL = 128
 MVLE_DIM_LOCAL = 64
 MVLE_USE_POS_EMBED = True
@@ -93,7 +93,7 @@ MVLE_WARMUP_EPOCHS = 3              # ramp the loss in linearly
 MOSAIC_START = 0
 MOSAIC_END = 284
 
-# ── Loss weights ──────────────────────────────────────────────────────
+# -- Loss weights ------------------------------------------------------
 # Fire and smoke boundaries are amorphous and annotated subjectively, so
 # overlap quality matters more than exact coordinates: GIoU outweighs L1.
 # NWD is used for matching only (see COST_NWD) and has no loss term.
@@ -110,7 +110,7 @@ LOSS_WEIGHTS = {
     "loss_nwd_dn": 0.0,
 }
 
-# ── Hungarian matching ────────────────────────────────────────────────
+# -- Hungarian matching ------------------------------------------------
 COST_CLASS = 2.5
 COST_BBOX = 2.0
 COST_GIOU = 5.0
@@ -120,7 +120,7 @@ FOCAL_GAMMA = 1.5
 EOS_COEF = 0.1
 USE_UNI_SET = True                 # share box losses across decoder layers
 
-# ── Optimisation ──────────────────────────────────────────────────────
+# -- Optimisation ------------------------------------------------------
 MAX_EPOCHS = 300
 WARMUP_EPOCHS = 3
 FLAT_EPOCHS = 30                   # hold the base LR before annealing
@@ -133,7 +133,7 @@ NBS = 256                          # nominal batch size, sets grad accumulation
 EMA_DECAY = 0.9999
 LR_GAMMA = 0.5                     # final LR is base LR times this
 
-# ── Logging ───────────────────────────────────────────────────────────
+# -- Logging -----------------------------------------------------------
 LOG_EVERY_N_STEPS = 60
 CHECKPOINT_NAME = "mvlfirenet"
 CHECKPOINT_MONITOR = "val_map"
@@ -145,7 +145,7 @@ CHECKPOINT_FILENAME = "mvlfirenet-{epoch:02d}-{val_map:.2f}"
 RESUME_CHECKPOINT = ""            # warm start from the given weights
 RESUME_TRAINING_CHECKPOINT = ""   # resume an interrupted run
 
-# ── Evaluation ────────────────────────────────────────────────────────
+# -- Evaluation --------------------------------------------------------
 EVAL_CONF_THRESHOLD = 0.001
 
 if DEBUG:

@@ -7,11 +7,11 @@
 Lightweight forest fire and smoke detection for UAV-based monitoring, with
 multi-granularity vision-language enhancement.
 
-**2.41 M parameters · 6.8 GFLOPs · 86.3% mAP@0.5 · 54.8% mAP@0.5:0.95**
+**2.41 M parameters . 6.8 GFLOPs . 86.3% mAP@0.5 . 54.8% mAP@0.5:0.95**
 
 Paper: [A Lightweight Forest Fire Detection Model with Multi-Granularity
-Vision-Language Enhancement](https://www.mdpi.com/2571-6255/9/9/409) —
-*Fire* **2026**, 9, 409 · DOI [10.3390/fire9090409](https://doi.org/10.3390/fire9090409)
+Vision-Language Enhancement](https://www.mdpi.com/2571-6255/9/9/409) --
+*Fire* **2026**, 9, 409 . DOI [10.3390/fire9090409](https://doi.org/10.3390/fire9090409)
 
 ---
 
@@ -23,11 +23,11 @@ way, and each module below addresses one:
 
 | Module | Paper | Problem it solves | Code |
 |--------|-------|-------------------|------|
-| **MSA** | §2.2.2 | Self-attention flattens 2D feature maps into 1D sequences, destroying the high-frequency spatial detail that weak fire spots and smoke edges depend on. | [`models/modules.py`](models/modules.py) → `MSAAttention` |
-| **CMF** | §2.2.3 | Plain concatenation at pyramid nodes treats shallow and deep features as interchangeable, although they live in different representation spaces. | [`models/modules.py`](models/modules.py) → `CMF` |
-| **MVLE** | §2.2.4 | Pixel-only detectors confuse fire with reddish leaves, sunset glow, morning fog and dust. | [`models/mvle.py`](models/mvle.py) → `MVLEBranch` |
+| **MSA** | Section 2.2.2 | Self-attention flattens 2D feature maps into 1D sequences, destroying the high-frequency spatial detail that weak fire spots and smoke edges depend on. | [`models/modules.py`](models/modules.py) -> `MSAAttention` |
+| **CMF** | Section 2.2.3 | Plain concatenation at pyramid nodes treats shallow and deep features as interchangeable, although they live in different representation spaces. | [`models/modules.py`](models/modules.py) -> `CMF` |
+| **MVLE** | Section 2.2.4 | Pixel-only detectors confuse fire with reddish leaves, sunset glow, morning fog and dust. | [`models/mvle.py`](models/mvle.py) -> `MVLEBranch` |
 
-The backbone, neck and head follow §2.2.1: an ELAN backbone with SPPF
+The backbone, neck and head follow Section 2.2.1: an ELAN backbone with SPPF
 (`Backbone`, `SPPF`), an FPN neck (`FPNNeck`), and an RT-DETR decoder
 (`RTDETRDecoder`). Each class docstring cites the section and equations it
 implements.
@@ -43,14 +43,14 @@ whole detector.
 ```
 Input 640x640
   |
-  +-- Backbone    ELAN + SPPF                           -> C3, C4, C5   (1.40 M)
+  +-- Backbone    ELAN + SPPF                        -> C3, C4, C5   (1.40 M)
   |
   +-- Neck        FPN
-  |     P5: C5 -> MSABlock (MSA)                        -> P5
-  |     P4: CMF(C4, P5 up) -> ELANBlock                   -> P4         (0.43 M total)
-  |     P3: CMF(C3, P4 up) -> ELANBlock                   -> P3
+  |     P5: C5 -> MSABlock (MSA)                     -> P5
+  |     P4: CMF(C4, P5 up) -> ELANBlock               -> P4         (0.43 M total)
+  |     P3: CMF(C3, P4 up) -> ELANBlock               -> P3
   |
-  +-- Head        RT-DETR decoder, 300 object queries    (0.58 M)
+  +-- Head        RT-DETR decoder, 300 object queries                (0.58 M)
   |               MAL classification + L1 + GIoU + denoising training
   |
   +-- MVLE        dual-pathway alignment, training only, dropped at inference
@@ -110,11 +110,11 @@ huggingface_hub>=0.23.0 # download_longclip.py
 
 ## Dataset
 
-**FSDataset-VL** — 19,866 images / 41,983 boxes, split 6:3:1 into
+**FSDataset-VL** -- 19,866 images / 41,983 boxes, split 6:3:1 into
 train 12,083 / val 5,640 / test 2,143. Two classes: `fire` and `smoke`.
 
-Each image carries a scene-level caption (80–120 words); each box carries a
-target-level caption (15–30 words). The MVLE branch aligns visual features with
+Each image carries a scene-level caption (80-120 words); each box carries a
+target-level caption (15-30 words). The MVLE branch aligns visual features with
 both.
 
 | Mirror | Link |
@@ -126,14 +126,14 @@ Extract into this layout:
 
 ```
 FSDataset-VL/
-├── images/
-│   ├── train/
-│   ├── val/
-│   └── test/
-└── captions/
-    ├── train.json
-    ├── val.json
-    └── test.json
++---- images/
+|   +---- train/
+|   +---- val/
+|   `---- test/
+`---- captions/
+    +---- train.json
+    +---- val.json
+    `---- test.json
 ```
 
 `captions/<split>.json`:
@@ -247,24 +247,24 @@ zero inference overhead of the branch.
 
 ```
 MVLFireNet/
-├── config.py              # paths, data, hardware, architecture, loss, optimisation
-├── train.py               # training entry: EMA, Mosaic schedule, grad accumulation
-├── loss.py                # MAL + Hungarian / union matching + L1 + GIoU + NWD
-├── metrics.py             # mAP, per-image TP/FP, confusion matrix
-├── utils.py               # box coordinate helpers
-├── models/
-│   ├── mvlfirenet.py      # MVLFireNet: backbone, wiring, LightningModule, optimiser
-│   ├── modules.py         # MSAAttention, MSABlock, CMF, ELANBlock, SPPF, MGFFN
-│   ├── neck.py            # FPN neck with MSA at P5 and CMF at the fusion nodes
-│   ├── head.py            # RT-DETR decoder: 300 queries, deformable attention, denoising
-│   └── mvle.py            # MVLE: dual-pathway alignment, frozen Long-CLIP text encoder
-├── data/
-│   └── datasets.py        # FSDatasetVL dataset, Mosaic/HSV/flip/albumentations
-├── scripts/
-│   ├── download_longclip.py
-│   └── smoke_test.py      # complexity check against the paper
-└── docs/
-    └── DATASET.md         # annotation schema and statistics
+|-- config.py              # paths, data, hardware, architecture, loss, optimisation
+|-- train.py               # training entry: EMA, Mosaic schedule, grad accumulation
+|-- loss.py                # MAL + Hungarian / union matching + L1 + GIoU + NWD
+|-- metrics.py             # mAP, per-image TP/FP, confusion matrix
+|-- utils.py               # box coordinate helpers
+|-- models/
+|   |-- mvlfirenet.py      # MVLFireNet: backbone, wiring, LightningModule, optimiser
+|   |-- modules.py         # MSAAttention, MSABlock, CMF, ELANBlock, SPPF, MGFFN
+|   |-- neck.py            # FPN neck with MSA at P5 and CMF at the fusion nodes
+|   |-- head.py            # RT-DETR decoder: 300 queries, deformable attention, denoising
+|   `-- mvle.py            # MVLE: dual-pathway alignment, frozen Long-CLIP text encoder
+|-- data/
+|   `-- datasets.py        # FSDatasetVL dataset, Mosaic/HSV/flip/albumentations
+|-- scripts/
+|   |-- download_longclip.py
+|   `-- smoke_test.py      # complexity check against the paper
+`-- docs/
+    `-- DATASET.md         # annotation schema and statistics
 ```
 
 ---
@@ -291,7 +291,7 @@ MVLFireNet/
 
 Code is released under the [MIT License](LICENSE).
 
-The article is © 2026 by the authors under CC BY 4.0. The Long-CLIP weights
+The article is (c) 2026 by the authors under CC BY 4.0. The Long-CLIP weights
 downloaded by `scripts/download_longclip.py` carry their own license and are not
 redistributed here. FSDataset-VL images are not included in this repository; see
 [`docs/DATASET.md`](docs/DATASET.md) for access details.

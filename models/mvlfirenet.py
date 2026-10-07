@@ -154,7 +154,7 @@ class MVLFireNet(pl.LightningModule):
     def post_process(self, outputs):
         return outputs['pred_logits'].sigmoid()
 
-    # ── training ──
+    # -- training --
 
     def training_step(self, batch, batch_idx):
         outputs = self(batch['images'], targets=batch['targets'])
@@ -228,7 +228,7 @@ class MVLFireNet(pl.LightningModule):
                     losses[k] = losses[k] * scale
         return losses
 
-    # ── validation ──
+    # -- validation --
 
     def validation_step(self, batch, batch_idx):
         outputs = self(batch['images'])
@@ -326,7 +326,7 @@ class MVLFireNet(pl.LightningModule):
                 dist.gather_object(self._val_raw_preds, None, dst=0)
                 dist.gather_object(self._val_raw_targets, None, dst=0)
 
-    # ── optimisation ──
+    # -- optimisation --
 
     def configure_optimizers(self):
         """Build the AdamW parameter groups and the warmup/flat/cosine schedule.

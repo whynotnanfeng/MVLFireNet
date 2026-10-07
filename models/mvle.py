@@ -132,13 +132,13 @@ class MVLEBranch(nn.Module):
         nn.init.xavier_uniform_(self.text_local_head.weight)
         nn.init.zeros_(self.text_local_head.bias)
 
-        # ── global visual pathway ──
+        # -- global visual pathway --
         self.proj_global = nn.Conv2d(256, sa_dim_global, 1)
         self.pool_global = SwiGLUPool(sa_dim_global, nhead)
         nn.init.xavier_uniform_(self.proj_global.weight)
         nn.init.zeros_(self.proj_global.bias)
 
-        # ── local visual pathway ──
+        # -- local visual pathway --
         self.proj_local = nn.Conv2d(256, sa_dim_local, 1)
         self.pool_local = SwiGLUPool(sa_dim_local, nhead)
         nn.init.xavier_uniform_(self.proj_local.weight)

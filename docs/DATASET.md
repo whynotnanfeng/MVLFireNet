@@ -1,10 +1,10 @@
-# MVLFireNet — Dataset
+# MVLFireNet -- Dataset
 
 ## FSDataset-VL
 
 Multi-granularity text-image forest fire detection dataset introduced in the paper.
 Built on top of the earlier FSDataset image collection by **adding multi-granularity textual
-annotations** — no new images were introduced.
+annotations** -- no new images were introduced.
 
 | Split | Images | Boxes | Fire | Smoke | Labels/Image |
 |-------|--------|-------|------|-------|--------------|
@@ -18,8 +18,8 @@ annotations** — no new images were introduced.
 | Scale | Area ratio | Proportion |
 |-------|-----------|------------|
 | Small | < 1% | 15.4% |
-| Medium | 1–10% | 40.8% |
-| Large | 10–30% | 29.9% |
+| Medium | 1-10% | 40.8% |
+| Large | 10-30% | 29.9% |
 | X-Large | > 30% | 13.9% |
 
 ### Multi-dimensional scene semantics
@@ -39,10 +39,10 @@ annotations** — no new images were introduced.
 Two levels of text per image, which is what distinguishes FSDataset-VL from
 bbox-only fire datasets:
 
-- **Global scene description** — one per image, **80–120 words**. Describes weather, terrain,
+- **Global scene description** -- one per image, **80-120 words**. Describes weather, terrain,
   illumination, vegetation, and the development stage of fire/smoke. This is what the MVLE
   global pathway aligns against.
-- **Local detail description** — one per bounding box, **15–30 words**. Describes the target's
+- **Local detail description** -- one per bounding box, **15-30 words**. Describes the target's
   color, brightness, morphological edges, occlusion status, and diffusion. This is what the
   MVLE local pathway aligns against.
 
@@ -50,14 +50,14 @@ bbox-only fire datasets:
 
 ```
 FSDataset-VL/
-├── images/
-│   ├── train/
-│   ├── val/
-│   └── test/
-└── captions/
-    ├── train.json
-    ├── val.json
-    └── test.json
+|-- images/
+|   |-- train/
+|   |-- val/
+|   `-- test/
+`-- captions/
+    |-- train.json
+    |-- val.json
+    `-- test.json
 ```
 
 ### `captions/<split>.json`
@@ -86,25 +86,25 @@ FSDataset-VL/
 |-------|------|-------|
 | `image_id` | int | Joins `images` to `annotations` |
 | `file_name` | str | Resolved against `images/<split>/`; only the basename is used |
-| `global_caption` | str | 80–120 words, image level |
+| `global_caption` | str | 80-120 words, image level |
 | `category_id` | int | `0 = fire`, `1 = smoke` (see `config.CLASS_NAMES`) |
-| `bbox` | [4] float | **Normalized** `cx, cy, w, h` in `[0, 1]` — not `xyxy` |
-| `local_caption` | str | 15–30 words, box level |
+| `bbox` | [4] float | **Normalized** `cx, cy, w, h` in `[0, 1]` -- not `xyxy` |
+| `local_caption` | str | 15-30 words, box level |
 
 ### Annotation pipeline
 
 Text was produced by a VLM (MiMo-v2.5, Python 3.10.15) under a three-stage protocol:
 
-1. **Generation** — global captions from image + prompt. Local captions use an
+1. **Generation** -- global captions from image + prompt. Local captions use an
    annotation-assisted strategy: boxes are rendered onto the image (red = fire, blue = smoke)
    and the prompt requires the description to correspond to the boxed region, which avoids
    feature confusion in multi-target scenes.
-2. **Automated validation** — two tiers with a feedback loop. Tier 1 runs regex/JSON parsing,
+2. **Automated validation** -- two tiers with a feedback loop. Tier 1 runs regex/JSON parsing,
    length thresholds, and keyword-conflict checks (e.g. a caption labeled `fire` containing no
    fire-related vocabulary is rejected and regenerated). Tier 2 retries failed samples by
    feeding cropped box regions, full-image context, the draft caption and the expected category
    back to the VLM for diagnosis, then regenerates with constraint-repair prompts.
-3. **Manual review** — four authors re-assessed a random 5% sample against five criteria
+3. **Manual review** -- four authors re-assessed a random 5% sample against five criteria
    (no fabricated content; color/morphology/stage alignment with visual evidence; length and
    keyword constraints; no subjective speculation; no conflict with the Fire/Smoke label).
    Corrections were applied and re-inspected, with no residual errors found.
